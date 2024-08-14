@@ -163,7 +163,7 @@ export default function OrderTable() {
           '& td, & th': { whiteSpace: 'nowrap' }
         }}
       >
-        <Table aria-labelledby="tableTitle">
+        <Table aria-labelledby="tableTitle"   >
           <OrderTableHead order={order} orderBy={orderBy} />
           <TableBody>
             {stableSort(rows, getComparator(order, orderBy)).map((row, index) => {

@@ -8,7 +8,7 @@ const Color = Loadable(lazy(() => import('pages/component-overview/color')));
 const Typography = Loadable(lazy(() => import('pages/component-overview/typography')));
 const Shadow = Loadable(lazy(() => import('pages/component-overview/shadows')));
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/index')));
-
+const MyDrive = Loadable(lazy(() => import('pages/mydrive/mydrive')));
 // render - sample page
 const SamplePage = Loadable(lazy(() => import('pages/extra-pages/sample-page')));
 
@@ -38,6 +38,10 @@ const MainRoutes = {
     {
       path: 'sample-page',
       element: <SamplePage />
+    },
+    {
+      path: 'mydrive',
+      element: <MyDrive />
     },
     {
       path: 'shadow',

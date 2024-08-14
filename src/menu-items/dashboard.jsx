@@ -1,9 +1,10 @@
 // assets
-import { DashboardOutlined } from '@ant-design/icons';
+import { DashboardOutlined , DatabaseTwoTone, FundProjectionScreenOutlined, AppstoreOutlined} from '@ant-design/icons';
+
 
 // icons
 const icons = {
-  DashboardOutlined
+  DashboardOutlined, DatabaseTwoTone, FundProjectionScreenOutlined, AppstoreOutlined
 };
 
 // ==============================|| MENU ITEMS - DASHBOARD ||============================== //
@@ -15,12 +16,36 @@ const dashboard = {
   children: [
     {
       id: 'dashboard',
-      title: 'Dashboard',
+      title: '나의 대시보드',
       type: 'item',
       url: '/dashboard/default',
-      icon: icons.DashboardOutlined,
+      icon: icons.AppstoreOutlined,
       breadcrumbs: false
-    }
+    },
+    {
+      id: 'mydrive',
+      title: '나의 드라이브',
+      type: 'item',
+      url: '/mydrive',
+      icon: icons.DatabaseTwoTone,
+      breadcrumbs: false
+    },
+    {
+      id: 'sharedrive',
+      title: '공유 드라이브',
+      type: 'item',
+      url: '/sample-page3',
+      icon: icons.DatabaseTwoTone,
+      breadcrumbs: false
+    },
+    {
+      id: 'project',
+      title: '프로젝트',
+      type: 'item',
+      url: '/sample-page4',
+      icon: icons.FundProjectionScreenOutlined,
+      breadcrumbs: false
+    },
   ]
 };
 

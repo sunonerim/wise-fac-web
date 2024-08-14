@@ -3,11 +3,11 @@
 const config = {
   defaultPath: '/dashboard/default',
   fontFamily: `'Public Sans', sans-serif`,
-  i18n: 'en',
+  i18n: 'fr',
   miniDrawer: false,
-  container: true,
+  container: false,
   mode: 'light',
-  presetColor: 'default',
+  presetColor: 'theme2',
   themeDirection: 'ltr'
 };
 

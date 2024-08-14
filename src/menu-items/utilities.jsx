@@ -27,21 +27,21 @@ const utilities = {
   children: [
     {
       id: 'util-typography',
-      title: 'Typography',
+      title: '결재 문서',
       type: 'item',
       url: '/typography',
       icon: icons.FontSizeOutlined
     },
     {
       id: 'util-color',
-      title: 'Color',
+      title: '반출 문서',
       type: 'item',
       url: '/color',
       icon: icons.BgColorsOutlined
     },
     {
       id: 'util-shadow',
-      title: 'Shadow',
+      title: '반입 문서',
       type: 'item',
       url: '/shadow',
       icon: icons.BarcodeOutlined

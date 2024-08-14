@@ -1,6 +1,7 @@
 // assets
 import { LoginOutlined, ProfileOutlined } from '@ant-design/icons';
 
+
 // icons
 const icons = {
   LoginOutlined,
@@ -11,7 +12,7 @@ const icons = {
 
 const pages = {
   id: 'authentication',
-  title: 'Authentication',
+  title: '로그인',
   type: 'group',
   children: [
     {
