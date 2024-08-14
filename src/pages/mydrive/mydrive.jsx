@@ -27,11 +27,13 @@ import ShareIcon from '@mui/icons-material/Share';
 
 // project import
 import MainCard from 'components/MainCard';
-import FileUploadDialog from 'pages/mydrive/FileUploadDialog';
+import FileUploadDialog from 'components/dialogs/FileUploadDialog';
 import FolderEditDialog from 'components/dialogs/FolderEditDialog';
 import FolderFileListView from 'components/frames/FolderFileListView';
 import FileDetailDrawer from 'components/drawers/FileDetailDrawer';
 import FolderSelectDialog from 'components/dialogs/FolderSelectDialog';
+import DriveRequest from 'api/driveRequest.jsx';
+import ApiRequest from 'components/logic/ApiRequest';
 
 // ==============================|| SAMPLE PAGE ||============================== //
 
@@ -63,30 +65,28 @@ function NewSpeedDial () {
   );
 }
 
-function postFileUpload( files ) {
-  console.log('---------- handleFileUpload', files);
-  const formData = new FormData();  
-  files.forEach( file => {
-    formData.append('multipartFiles', file);
-  });
+// function postFileUpload( files ) {
+//   console.log('---------- handleFileUpload', files);
+//   const formData = new FormData();  
+//   files.forEach( file => {
+//     formData.append('multipartFiles', file);
+//   });
+//   formData.append('parentId', curFolderId );
+//   formData.append('aclId', 200 );
   
-  formData.append('parentId', 1 );
-  formData.append('aclId', 200 );
-  
-  fetch('http://localhost:8080/wisemen/api/v1/mydrive/folders/files', {
-    method: 'POST',
-    body: formData,
-    headers: { 'wm-user-id': 'tiger'}
-  })
-    .then(response => response.json())
-    .then(data => {
-      console.log("data", data);
-    })
-    .catch( error => {
-      console.log( 'ERROR FETCH ')
-    });
-
-}
+//   fetch('http://localhost:8080/wisemen/api/v1/mydrive/folders/files', {
+//     method: 'POST',
+//     body: formData,
+//     headers: { 'wm-user-id': 'tiger'}
+//   })
+//     .then(response => response.json())
+//     .then(data => {
+//       console.log("data", data);
+//     })
+//     .catch( error => {
+//       console.log( 'ERROR FETCH ')
+//     });
+// }
 
 // ==============================|| MyDrive ||============================== //
 export default function MyDrive() {
@@ -97,90 +97,137 @@ export default function MyDrive() {
   const [folderContents, setFolderContents] = useState([]);         // 퐁더의 자식 파일 목록
   const [uploadOpenDialog, setUploadOpenDialog] = useState(false);
   const [folderCreateOpenDialog, setFolderCreateOpenDialog] = useState(false);
-  const leftMenuWidth = 250;
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [fileSelectMode, setFileSelectMode] = useState(null);
   const [reload, setReload] = useState(0);
+  const [api, setApi] = useState(null);
+
   
-  useEffect(() => {
-    console.log('------------------ MyDrive useEffect --------------------');
-    goFolder(1);    
-  }, [reload]);
+  const [curFolderId, setCurFolderId] = useState(1);
+  useEffect(()=>
+    {      
+      goFolder(curFolderId);
+    }, [reload]);
 
   const handleOpenUpload = (event) => {
-    console.log('파일 업로드 클릭');
+    // console.log('파일 업로드 클릭');
     setUploadOpenDialog(true);
   };
 
   const handleFileUpload = (files) => {
     console.log('파일 업로드', files);
-    postFileUpload(files);
+    if ( files && files.length > 0 ){
+      DriveRequest.postFileUploadCommand( curFolderId, files ).then( (response) => { 
+        // console.log('response', response);
+        refreshList();
+      });
+    }
+    
     setUploadOpenDialog(false);
   };
 
-  const handleFolderCreate = (event) => {
-    setFolderCreateOpenDialog(true);
+  const handleFolderCreate = () => {
+    openFolderCreateOpenDialog();
   };
 
   const handleFolderCreateClose = (folderName) => {
-    console.log('폴더 생성', folderName);
-    setFolderCreateOpenDialog(false);
-    postFolderCreateCommand(folderName);
+    // console.log('폴더 생성', folderName);
+    closeFolderCreateOpenDialog();
+    DriveRequest.postFolderCreateCommand(curFolderId,  folderName).then( (response) => {
+      // console.log('response', response);
+      refreshList();
+    });
   };
 
-  const handleFolderSelectClose = (fileLists) => {
-    setFolderSelectOpen(false);
+  const openFolderCreateOpenDialog = () => {
+    setFolderCreateOpenDialog(true);
   };
+
+  const closeFolderCreateOpenDialog = () => {
+    setFolderCreateOpenDialog(false);
+  };
+
+
+
+  const openFileDrawer = () => {
+    setFileDrawerOpen ( true )
+  };
+
+  const closeFileDrawer = () => {
+    setFileDrawerOpen ( false )
+  };
+
 
   const refreshList = () => {
     setReload(reload + 1);
   };
 
 
-  const handleDuplicate = (event) => {
-    folderContents.filter( content => content.checked === true ).forEach( content => {      
-      console.log('duplicate', content);
-    });
-    setFolderSelectOpen ( true );
+  const handleDuplicate = (event) => {    
+    
+    if( selectedItems.length > 0 ) {
+      openFolderSelectDialog ('DUPLICATE' );
+    } else {    
+      setApi ( Date.now() );
+      // alert('복제할 파일을 선택하세요');
+    }
   }
 
   const handleMove = (event) => {
-    folderContents.filter( content => content.checked === true ).forEach( content => {
-      console.log('duplicate', content);
-    });
+    console.log( '---- handleMove', selectedItems );    
+    if( selectedItems.length > 0 ) {
+      openFolderSelectDialog ( 'MOVE');
+    } else {
+      alert('이동할 파일을 선택하세요');
+    }
   }
+  const openFolderSelectDialog = (selectMode ) => {
+    setFileSelectMode( selectMode );
+    setFolderSelectOpen(true);
+  };
+
+  const closeFolderSelectDialog = (folderId) => {
+    if( folderId ) {
+      if( fileSelectMode === 'MOVE' ) {
+        console.log('MOVE   selectedItems -->  folderId', folderId, selectedItems );
+        setApi ( 'http://localhost:8080/wisemen/api/v1/mydrive/folders/move' );
+        goFolder(folderId);
+      } else if ( fileSelectMode === 'DUPLICATE' ) {
+        console.log('복제    selectedItems -->  folderId', folderId, selectedItems );
+        setApi ( 'http://localhost:8080/wisemen/api/v1/mydrive/folders/DUPLICATE' );
+        goFolder(folderId);
+      }      
+    }
+    setFolderSelectOpen(false);
+  };
 
   const setupFolderContents = ( contents  ) => {
-      contents.forEach( content => {
-        content.checked = true;        
-      });
-      console.log ('setupFolderContents', contents);
+    contents.forEach( content => {
+      content.checked = true;
+    });
+      // console.log ('setupFolderContents', contents);
       setFolderContents(contents);
   }
 
   const getFolderContentQuery = ( folderId ) => {
-    let urlFolderContentQuery = `http://localhost:8080/wisemen/api/v1/mydrive/folders/${folderId}`;
-    axios.get( urlFolderContentQuery, { 
-      headers:{        
-       'wm-user-id': 'tiger'
-         } 
-       } ).then ( response => {
-        console.log('response', response);        
-        setupFolderContents(response.data);
+    DriveRequest.getFolderContents( folderId ).then( (contents) => {
+      setupFolderContents(contents);
     });
   };
 
   const getFolderPath = ( folderId ) => {
-    let urlFolderContentQuery = `http://localhost:8080/wisemen/api/v1/mydrive/folders/path/${folderId}`;
-    axios.get( urlFolderContentQuery
-              , { headers:{    'wm-user-id': 'tiger'} })
-          .then ( response => {
-            console.log('PATH', response);            
-            setFolderPath(response.data.reverse());
-        });
-    }
+    DriveRequest.getFolderPath( folderId ).then ( (path) => {
+      setFolderPath(path);
+    });
+  }
 
   const goFolder = ( folderId ) => {
-    console.log('goFolder', folderId);
-    getFolderContentQuery( folderId );
+    setCurFolderId( folderId );
+    DriveRequest.getFolderContents( folderId ).then( (contents) => {
+      // console.log('eee folderContents', contents);
+      setFolderContents(contents);
+      setSelectedItems([]);
+    });
     getFolderPath( folderId );
   }
 
@@ -190,69 +237,49 @@ export default function MyDrive() {
     };
   }
 
-  const postFolderCreateCommand = ( folderName ) => {
-    axios.post('http://localhost:8080/wisemen/api/v1/mydrive/folders', 
-      {
-      folderName: folderName,
-      parentId: 1,
-      aclId: 200
-      }, 
-      { 
-      headers:{ 
-       'Content-type': 'application/json', 
-       'Accept': 'application/json' ,
-       'wm-user-id': 'tiger'} 
-       } ).then ( response => {
-        console.log('response', response);
-      // setReload(reload + 1);
-        refreshList();
-    });
-  };
+  const doCheckedChange = (selected) => {
+    console.log('onCheckedChange', selected);
+    setSelectedItems(selected);
+  }
 
-  const requestFileDelete = ( fileId ) => {
-    axios.delete(`http://localhost:8080/wisemen/api/v1/mydrive/folders/files/${fileId}`
-      ,{headers:{ 
-       'Content-type': 'application/json', 
-       'Accept': 'application/json' ,
-       'wm-user-id': 'tiger'
-         } 
-        }
-        ).then ( response => {
-        console.log('response', response);       
-        refreshList();
-    });
-  };
+const doItemActionClick = (  command, folder ) => {
+  switch( command ) {
+    case 'open':
+      if( folder.metaName === 'FOLDER' ) {
+        goFolder( folder.id );
+      }
+      break;
 
-  const folderClickHandle = (  command, folder ) => {
-    switch( command ) {
-      case 'open':
-        if( folder.metaName === 'FOLDER' ) {
-          goFolder( folder.id );
-        }
-        break;
+  case 'delete':
+      console.log('delete', folder);
+      if (folder.metaName === 'FOLDER') {
+        DriveRequest.deleteFolderCommand( folder.id ).then( (response) => {
+          console.log('response', response);
+          refreshList();
+        });        
+      } else {
+        DriveRequest.deleteFileCommand( folder.id ).then( (response) => {
+          console.log('response', response);
+          refreshList();
+        });
+      }
+      break;
 
-      case 'delete':
-        console.log('delete', folder);
-        if (folder.metaName === 'FOLDER') {
-        } else {
-          requestFileDelete( folder.id );
-        }
-        break;
+  case 'rename':
+      console.log('rename', folder);      
+      break;
 
-      case 'rename':
-        console.log('rename', folder);
-        setFileDrawerOpen(true);
-        break;
+  case 'download':
+      console.log('download', folder);
+      break;
+    
+  case 'view':
+      console.log('view', folder);
+      openFileDrawer();
+      break;
+  }
+};
 
-      case 'download':
-        console.log('download', folder);
-        break;
-    }
-  };
-
-  const handleFileDrawerClose = () => {
-    setFileDrawerOpen ( false)
-  };
 
   function Breadcombpath ( {paths} ) {          
     console.log('Breadcombpath', paths);
@@ -271,24 +298,25 @@ export default function MyDrive() {
   return (
     <>
     <MainCard title="My Drive">
+      <ApiRequest api={api}/>
       <Breadcombpath paths={folderPath} />    
 
-      <FileDetailDrawer open={fileDrawerOpen} onClose={ handleFileDrawerClose } />
+      <FileDetailDrawer open={fileDrawerOpen} onClose={ closeFileDrawer } />
 
       <Box sx={{display: 'flex', justifyContent: 'flex-end', mb: 2}}>       
          <ButtonGroup variant="outlined" aria-label="Basic button group" size="small">
           <Button onClick={handleFolderCreate} sx={{width:120}} >폴더 생성</Button>
           <Button onClick={handleOpenUpload}   sx={{width:120}}>파일업로드</Button>
           <Button onClick={handleDuplicate}    sx={{width:120}}>복제</Button>
-          <Button onClick={handleMove}         sx={{width:120}} startIcon={<UploadFileOutlinedIcon/>}>이동</Button>
+          <Button onClick={handleMove}         sx={{width:120}}>이동</Button>
          </ButtonGroup>
       </Box>      
-      <FolderFileListView folderContents={folderContents} onFolderClick={folderClickHandle} onCheckedChange={ (selected)=>{ console.log( selected )}} />
+      <FolderFileListView folderContents={folderContents} onItemActionClick={doItemActionClick} onCheckedChange={doCheckedChange} />
       <NewSpeedDial/>
 
       <FileUploadDialog fileUploadCallback={handleFileUpload} open={uploadOpenDialog} />
       <FolderEditDialog open={folderCreateOpenDialog} onClose={handleFolderCreateClose} />
-      <FolderSelectDialog open={folderSelectOpen} onClose={handleFolderSelectClose} rootFolderId={1}/>
+      <FolderSelectDialog open={folderSelectOpen} onClose={closeFolderSelectDialog} rootFolderId={1} />
     </MainCard>
     
     </>

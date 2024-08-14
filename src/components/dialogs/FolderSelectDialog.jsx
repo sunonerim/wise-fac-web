@@ -10,12 +10,12 @@ import axios from 'axios';
 
 // ==============================|| FileUploadDialog  ENTRY POINT  ||============================== //
 export default function FolderSelectDialog({  open, onClose , rootFolderId }) {
-  const [folderName, setFolderName] = useState('');
+  const [folderId, setFolderId] = useState( '');
   const [folderList, setFolderList] = useState([]);
 
   useEffect(() => {
     getFolderContentQuery(rootFolderId);
-  }, [folderName]);
+  }, [folderId]);
 
   const getFolderContentQuery = async ( folderId ) => {
     console.log('---- getFolderContentQuery', folderId);
@@ -43,12 +43,12 @@ export default function FolderSelectDialog({  open, onClose , rootFolderId }) {
     console.log ('folderList', folderList);
   }
 
-  const onCreate = () => {
-    onClose(folderName);
-    setFolderName('');
+  const dotOkButtonClick = () => {
+    console.log('dotOkButtonClick', folderId);
+    onClose(folderId);    
   };
   const handleFolderNameChange = (event) => {
-    setFolderName(event.target.value);
+    // setFolderName(event.target.value);
   };
 
   const handleFolderCreateClose = () => {
@@ -59,7 +59,8 @@ export default function FolderSelectDialog({  open, onClose , rootFolderId }) {
   
 
   const doSelectCallback = (folderId) => {
-    console.log('-------doSelectCallback', folderId);    
+    console.log('-------doSelectCallback', folderId);
+    setFolderId( folderId );
   }
 
   return (
@@ -98,7 +99,7 @@ export default function FolderSelectDialog({  open, onClose , rootFolderId }) {
             
         <DialogActions>
          <Button onClick={handleFolderCreateClose} variant="outlined" size="small">취소</Button>
-         <Button onClick={onCreate}  variant="contained" size="small">선택</Button>
+         <Button onClick={dotOkButtonClick}  variant="contained" size="small">선택</Button>
         </DialogActions>
       </Dialog>
         </>

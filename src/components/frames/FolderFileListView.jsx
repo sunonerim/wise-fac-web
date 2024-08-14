@@ -69,7 +69,7 @@ function createDataList ( array ) {
 // ==============================|| ORDER TABLE - HEADER ||============================== //
 function FolderFileTypeExpression ( {metaName, name } ) {
   if (metaName === 'FOLDER') {
-    return <CreateNewFolderOutlinedIcon sx={{ fill: 'blue', fontSize: 24, mb:-1 }} />;
+    return <CreateNewFolderOutlinedIcon sx={{ fill:'primary.main', fontSize: 24, mb:-1 }} />;
   } else {
     if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
       return <FileExcelOutlined style={{ fontSize: '20px', fill: '#DDD' }} />;
@@ -94,13 +94,13 @@ function FileSizeFormat( {metaName, size} ) {
     let recalcSize = size;
     let sizeSuffix = '';
     if (size > 1024 * 1024 * 1024) {
-      sizeSuffix = 'GB';
+      sizeSuffix = ' GB';
       recalcSize = Math.round(size / (1024 * 1024 * 1024));
     } else if (size > 1024 * 1024) {
-      sizeSuffix = 'MB';
+      sizeSuffix = ' MB';
       recalcSize = Math.round(size / (1024 * 1024));
     } else if (size > 1024) {
-      sizeSuffix = 'KB';
+      sizeSuffix = ' KB';
       recalcSize = Math.round(size / 1024);
     }
     return  <Typography variant="caption" color="textSecondary"><NumericFormat value={recalcSize} displayType="text" thousandSeparator suffix={sizeSuffix} /></Typography>
@@ -111,40 +111,6 @@ function FormatDate({dateStr}) {
   const d = dateStr.substring(0, 10);
   return <Typography variant="caption" color="textSecondary">{d}</Typography>
 }
-
-function handleFileUpload( files ) {
-  console.log('---------- handleFileUpload', files);
-  const formData = new FormData();  
-  files.forEach( file => {
-    formData.append('multipartFiles', file);
-  });
-  
-  formData.append('parentId', 220 );
-  formData.append('aclId', 200 );
-  
-  fetch('http://localhost:8080/wisemen/api/v1/mydrive/folders/files', {
-    method: 'POST',
-    body: formData,
-    headers: { 'wm-user-id': 'tiger'}
-  })
-    .then(response => response.json())
-    .then(data => {
-      console.log("data", data);
-    })
-    .catch( error => {
-      console.log( 'ERROR FETCH ')
-    });
-
-}
-
-// ==============================|| FOLDER FILE LIST VIEW  TABLE ||============================== //
-export default function FolderFileListView( {folderContents, onFolderClick, onCheckedChange} ) {
-  // const [folderContents, setFolderContents] = useState([]);
-  const order = 'asc';
-  const orderBy = 'tracking_no';
-  const [selected, setSelected] = useState([]);
-  const [rowData, setRowData] = useState([]);
-  
 
 const headCells = [  
   {
@@ -185,6 +151,14 @@ const headCells = [
 ];
 
 
+
+// ==============================|| FOLDER FILE LIST VIEW  TABLE ||============================== //
+export default function FolderFileListView( {folderContents, onItemActionClick, onCheckedChange} ) {
+  // const [folderContents, setFolderContents] = useState([]);
+  const order = 'asc';
+  const orderBy = 'tracking_no';  
+  const [rowData, setRowData] = useState([]);
+
   useEffect(() => {
     console.log('------------------ FolderFileListView useEffect --------------------');
     // getFolderContentQuery( 1 );
@@ -193,22 +167,20 @@ const headCells = [
   }, [folderContents]);
 
   function HeaderCell({cell}) {
-    if( cell.id === 'tracking_no' ) {      
-     return  (
-      <Checkbox/>      
-      );
+    if( cell.id === 'tracking_no'){
+     return <Checkbox/>      
     } else {
       return <Typography variant="caption" color="textSecondary">{cell.label}</Typography>
     }
   }
+
   function OrderTableHead({ order, orderBy }) {
     return (
       <TableHead>
         <TableRow>                  
           {headCells.map((headCell) => (
             <TableCell
-              key={headCell.id}
-              padding='checkbox'
+              key={headCell.id}              
               align={headCell.align}
               padding={headCell.disablePadding ? 'none' : 'normal'}
               sortDirection={orderBy === headCell.id ? order : false}
@@ -222,13 +194,7 @@ const headCells = [
       </TableHead>
     );
   }
-
-  // const isCheckboxChecked = (id) => {
-  //   console.log('isCheckboxChecked', id);
-  //   return selected.includes(id);
-  //   // return false;
-  // }
-
+  
   const handleHeaderClick = (id) => {
     
     let checkedCnt =  rowData.filter( (row) => row.checked ).length;
@@ -244,6 +210,7 @@ const headCells = [
       }
       setRowData([...rowData]);
     }
+    onCheckedChange( rowData.filter( (row) => row.checked ) );
   }
 
   const handleChange = ( item, checked ) => {
@@ -253,23 +220,7 @@ const headCells = [
       }
     }
     setRowData([...rowData]);
-
-    // console.log('handleChange', row, checked);
-    // if(checked) {
-    //   selected.push(row.id);
-    //   onCheckedChange( selected );
-    // } else {
-    //   let filtered =selected.filter((id) => id !== row.id);
-    //   console.log({ filtered });
-    //   setSelected([...filtered]);
-    //   onCheckedChange( filtered );
-    // }
-    
-    // console.log({ selected , onCheckedChange});
-    // if( onCheckedChange ) {
-    //   console.log('------------ onCheckedChange', selected);
-    //   onCheckedChange( selected );
-    // }
+    onCheckedChange( rowData.filter( (row) => row.checked ) );
   }
   
   return (
@@ -297,32 +248,26 @@ const headCells = [
                   <TableCell >
                     <Checkbox  onChange={ (e) => handleChange(  row, e.target.checked  )}  checked={ row.checked }/>
                     <FolderFileTypeExpression metaName={row.metaName} name={row.name} />
-                    <Typography variant="main" color="textSecondary" sx={{ml:1, '&:hover': { color: 'primary.main' } , cursor:'pointer'}}
-                      onClick={ (e) => onFolderClick(  'open', row)}>{row.name}</Typography>
+                    <Typography variant="main" color="textPrimary" sx={{ml:1, '&:hover': { color: 'primary.main' } , cursor:'pointer'}}
+                      onClick={ (e) => onItemActionClick(  'open', row)}>{row.name}</Typography>
                   </TableCell>
-                  
+
                   <TableCell align="center" ></TableCell>
-                  
                   <TableCell align="right" >
                     <FileSizeFormat metaName={row.metaName} size={row.size} />
                   </TableCell >
-
-                  
-
                   <TableCell align="center" >
                     <FormatDate dateStr={row.createDate} />
                   </TableCell>
 
                   <TableCell component="th" id={labelId} scope="row">                    
-                    <IconButton aria-label="delete" size="small" onClick={ (e) => onFolderClick(  'delete', row)} >
+                    <IconButton aria-label="delete" size="small" onClick={ (e) => onItemActionClick(  'delete', row)} >
                       <DeleteIcon sx={{height:20, fill:'#BBB'}}/>
                     </IconButton>
-
-                    <IconButton aria-label="rename"  size="small"  onClick={ (e) => onFolderClick(  'rename', row)} >
+                    <IconButton aria-label="rename"  size="small"  onClick={ (e) => onItemActionClick(  'rename', row)} >
                       <EditIcon sx={{height:20, fill:'#BBB'}}/>
                     </IconButton>
-                    
-                    <IconButton aria-label="rename"  size="small"  onClick={ (e) => onFolderClick(  'rename', row)} >
+                    <IconButton aria-label="rename"  size="small"  onClick={ (e) => onItemActionClick(  'view', row)} >
                       <VisibilityIcon sx={{height:20, fill:'#BBB'}}/>
                     </IconButton>
                   </TableCell>
