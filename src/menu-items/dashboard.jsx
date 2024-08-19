@@ -1,10 +1,10 @@
 // assets
-import { DashboardOutlined , DatabaseTwoTone, FundProjectionScreenOutlined, AppstoreOutlined} from '@ant-design/icons';
+import { DashboardOutlined , DatabaseOutlined, FundProjectionScreenOutlined, AppstoreOutlined} from '@ant-design/icons';
 
 
 // icons
 const icons = {
-  DashboardOutlined, DatabaseTwoTone, FundProjectionScreenOutlined, AppstoreOutlined
+  DashboardOutlined, DatabaseOutlined, FundProjectionScreenOutlined, AppstoreOutlined
 };
 
 // ==============================|| MENU ITEMS - DASHBOARD ||============================== //
@@ -19,7 +19,7 @@ const dashboard = {
       title: '나의 대시보드',
       type: 'item',
       url: '/dashboard/default',
-      icon: icons.AppstoreOutlined,
+      icon: icons.DashboardOutlined,
       breadcrumbs: false
     },
     {
@@ -27,7 +27,7 @@ const dashboard = {
       title: '나의 드라이브',
       type: 'item',
       url: '/mydrive',
-      icon: icons.DatabaseTwoTone,
+      icon: icons.DatabaseOutlined,
       breadcrumbs: false
     },
     {
@@ -35,7 +35,7 @@ const dashboard = {
       title: '공유 드라이브',
       type: 'item',
       url: '/sample-page3',
-      icon: icons.DatabaseTwoTone,
+      icon: icons.DatabaseOutlined,
       breadcrumbs: false
     },
     {
