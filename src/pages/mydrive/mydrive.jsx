@@ -102,8 +102,9 @@ export default function MyDrive() {
   const [selectedItems, setSelectedItems] = useState([]);
   const [fileSelectMode, setFileSelectMode] = useState(null);
   const [DocViewDialogOpen, setDocViewDialogOpen] = useState(false);
-  const [docName, setDocName] = useState('');
-  const [docUrl, setDocUrl] = useState('');
+  
+  
+  const [doc, setDoc] = useState({});
   const [reload, setReload] = useState(0);
   const [api, setApi] = useState(null);
 
@@ -290,9 +291,7 @@ export default function MyDrive() {
     case 'view':
       console.log('view', item);
       setDocViewDialogOpen(true);
-      setDocName(item.name);
-
-      setDocUrl( `http://localhost:8080/wisemen/api/v1/viewer/${item.id}/1` );
+      setDoc(item);
       break;      
     }
   };
@@ -336,7 +335,7 @@ export default function MyDrive() {
       <FolderSelectDialog open={folderSelectOpen} onClose={closeFolderSelectDialog} rootFolderId={1} />
     </MainCard>
     
-    <DocViewDialog open={DocViewDialogOpen} docName={docName} docUrl={docUrl} onClose={doDocViewDialgoClose} />
+    <DocViewDialog open={DocViewDialogOpen} doc={doc} onClose={doDocViewDialgoClose} />
     </>
   );
 }
