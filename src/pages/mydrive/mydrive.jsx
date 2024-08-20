@@ -32,9 +32,11 @@ import FolderEditDialog from 'components/dialogs/FolderEditDialog';
 import FolderFileListView from 'components/frames/FolderFileListView';
 import FileDetailDrawer from 'components/drawers/FileDetailDrawer';
 import FolderSelectDialog from 'components/dialogs/FolderSelectDialog';
+import DocViewDialog from 'components/dialogs/DocViewDialog';
 import DriveRequest from 'api/driveRequest.jsx';
 import ApiRequest from 'components/logic/ApiRequest';
-
+import FolderFileGridView from 'components/frames/FolderFileGridView';
+import { set } from 'lodash';
 // ==============================|| SAMPLE PAGE ||============================== //
 
 
@@ -99,6 +101,10 @@ export default function MyDrive() {
   const [folderCreateOpenDialog, setFolderCreateOpenDialog] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [fileSelectMode, setFileSelectMode] = useState(null);
+  const [DocViewDialogOpen, setDocViewDialogOpen] = useState(false);
+  
+  
+  const [doc, setDoc] = useState({});
   const [reload, setReload] = useState(0);
   const [api, setApi] = useState(null);
 
@@ -242,43 +248,53 @@ export default function MyDrive() {
     setSelectedItems(selected);
   }
 
-const doItemActionClick = (  command, folder ) => {
-  switch( command ) {
-    case 'open':
-      if( folder.metaName === 'FOLDER' ) {
-        goFolder( folder.id );
-      }
-      break;
-
-  case 'delete':
-      console.log('delete', folder);
-      if (folder.metaName === 'FOLDER') {
-        DriveRequest.deleteFolderCommand( folder.id ).then( (response) => {
-          console.log('response', response);
-          refreshList();
-        });        
-      } else {
-        DriveRequest.deleteFileCommand( folder.id ).then( (response) => {
-          console.log('response', response);
-          refreshList();
-        });
-      }
-      break;
-
-  case 'rename':
-      console.log('rename', folder);      
-      break;
-
-  case 'download':
-      console.log('download', folder);
-      break;
-    
-  case 'view':
-      console.log('view', folder);
-      openFileDrawer();
-      break;
+  const doDocViewDialgoClose = () => {    
+    setDocViewDialogOpen(false);
   }
-};
+  
+  const doItemActionClick = (  command, item ) => {
+    switch( command ) {
+      case 'open':
+        if( item.metaName === 'FOLDER' ) {
+          goFolder( item.id );
+        }
+        break;
+
+    case 'delete':
+        console.log('delete', item);
+        if (item.metaName === 'FOLDER') {
+          DriveRequest.deleteFolderCommand( item.id ).then( (response) => {
+            console.log('response', response);
+            refreshList();
+          });        
+        } else {
+          DriveRequest.deleteFileCommand( item.id ).then( (response) => {
+            console.log('response', response);
+            refreshList();
+          });
+        }
+        break;
+
+    case 'rename':
+        console.log('rename', item);      
+        break;
+
+    case 'download':
+        console.log('download', item);
+        break;
+      
+    case 'detail':
+        console.log('view', item);
+        openFileDrawer();
+        break;
+
+    case 'view':
+      console.log('view', item);
+      setDocViewDialogOpen(true);
+      setDoc(item);
+      break;      
+    }
+  };
 
 
   function Breadcombpath ( {paths} ) {          
@@ -287,9 +303,9 @@ const doItemActionClick = (  command, folder ) => {
       <Breadcrumbs aria-label="breadcrumb">
         { paths.map( (path, index) => (
           index === paths.length - 1 ? (
-            <Typography key={path.id} color="text.primary" >{path.name}</Typography>
+            <Typography key={path.id} color="text.primary" variant='caption'>{path.name}</Typography>
           ) : (            
-            <Typography key={path.id} color="text.primary" onClick={handleFolder(path.id)} sx={{cursor:"pointer", "&:hover": { color: "#0958d9" } }} >{path.name}</Typography>
+            <Typography key={path.id} color="text.primary" variant='caption' onClick={handleFolder(path.id)} sx={{cursor:"pointer", "&:hover": { color: "#0958d9" }, color:"#000", fontWeight:700 }} >{path.name}</Typography>
           )
         ))}
       </Breadcrumbs>
@@ -311,7 +327,7 @@ const doItemActionClick = (  command, folder ) => {
           <Button onClick={handleMove}         sx={{width:120}}>이동</Button>
          </ButtonGroup>
       </Box>      
-      <FolderFileListView folderContents={folderContents} onItemActionClick={doItemActionClick} onCheckedChange={doCheckedChange} />
+      <FolderFileGridView rowData={folderContents} onItemActionClick={doItemActionClick} onCheckedChange={doCheckedChange}/>
       <NewSpeedDial/>
 
       <FileUploadDialog fileUploadCallback={handleFileUpload} open={uploadOpenDialog} />
@@ -319,6 +335,7 @@ const doItemActionClick = (  command, folder ) => {
       <FolderSelectDialog open={folderSelectOpen} onClose={closeFolderSelectDialog} rootFolderId={1} />
     </MainCard>
     
+    <DocViewDialog open={DocViewDialogOpen} doc={doc} onClose={doDocViewDialgoClose} />
     </>
   );
 }
