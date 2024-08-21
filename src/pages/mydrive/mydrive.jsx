@@ -195,14 +195,28 @@ export default function MyDrive() {
   const closeFolderSelectDialog = (folderId) => {
     if( folderId ) {
       if( fileSelectMode === 'MOVE' ) {
-        console.log('MOVE   selectedItems -->  folderId', folderId, selectedItems );
-        setApi ( 'http://localhost:8080/wisemen/api/v1/mydrive/folders/move' );
-        goFolder(folderId);
+        console.log('MOVE   selectedItems -->  folderId', folderId, selectedItems );        
+        setApi ({
+          command : 'MOVE',
+          param : {
+            parentId : folderId,
+            selectedItems : selectedItems
+          },
+          callback : ()=>{ goFolder(folderId); }
+        });
+
+        // DriveRequest.moveFolderFile( folderId, selectedItems ).then( (response) => {
+        //   console.log('response', response);
+        //   refreshList();
+        //   goFolder(folderId);      
+        // });
+        console.log(">>>>>>>>>>>>>>>  check can do <<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+
       } else if ( fileSelectMode === 'DUPLICATE' ) {
         console.log('복제    selectedItems -->  folderId', folderId, selectedItems );
         setApi ( 'http://localhost:8080/wisemen/api/v1/mydrive/folders/DUPLICATE' );
         goFolder(folderId);
-      }      
+      }
     }
     setFolderSelectOpen(false);
   };
@@ -314,7 +328,7 @@ export default function MyDrive() {
   return (
     <>
     <MainCard title="My Drive">
-      <ApiRequest api={api}/>
+      <ApiRequest apiRequest={api}/>
       <Breadcombpath paths={folderPath} />    
 
       <FileDetailDrawer open={fileDrawerOpen} onClose={ closeFileDrawer } />

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Typography, Box , TextField} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import RuleFolderOutlinedIcon from '@mui/icons-material/RuleFolderOutlined';
-import RimTreeView from 'components/frames/RimTreeView';
 import FolderTreeView from 'components/frames/FolderTreeView';
 
 import axios from 'axios';

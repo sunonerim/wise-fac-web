@@ -17,7 +17,7 @@ import { NumericFormat } from 'react-number-format';
 
 
 function FolderFileTypeExpression ( {metaName, name } ) {
-  console.log('FolderFileTypeExpression', metaName, name);
+  // console.log('FolderFileTypeExpression', metaName, name);
   const fileIocnStylle = { fontSize: '20px', color: '#888' };
   const folderIocnStylle = { fontSize: '20px', color: '#69b1ff' };
 
@@ -71,7 +71,7 @@ function UIFormatDate({dateStr}) {
 function UIActionCell({ item, onItemActionClick}) {
   const iconStyle = { fontSize: '16px', color: 'secondary.light'};
 
-  console.log( '--------UIActionCell', item);
+  // console.log( '--------UIActionCell', item);
 
   if ( item.metaName === 'FOLDER' ) 
     return (
@@ -113,7 +113,7 @@ const conversionStatusColor = {
 
 
 function UIFileStatus ( {item}  ) {
-  console.log('UIFileStatus', item);
+  // console.log('UIFileStatus', item);
 
   if ( item.metaName == 'FOLDER') {
     return <></>
@@ -190,7 +190,7 @@ export default function FolderFileGridView({rowData, onItemActionClick, onChecke
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 'auto',
+      width: 320,
       renderCell: (params) => {
         return <UIActionCell item={params.row} onItemActionClick={onItemActionClick}/>;
       }

@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 
 // material-ui
-import {Button, TextField} from '@mui/material';
+import {Button, Typography} from '@mui/material';
 
 // project import
 import MainCard from 'components/MainCard';
@@ -18,12 +18,13 @@ import ApiRequest from 'components/logic/ApiRequest';
 
 export default function SamplePage() {
   const [error, setError] = useState(null);
-  const [tick, setTick] = useState(null);  
-  const [apiRequest, setApiRequest] = useState(null);
-  const [second, setSecond] = useState(3);
-  // setTimeout(() => {
-  //   setProgessOpen(false);
-  // }, 3000);
+  const [tick, setTick] = useState(null);
+  const [ProgessOpen, setProgessOpen] = useState(true);
+  const [ProgessMessage, setProgessMessage] = useState('....데이터 처리중...');
+
+  setTimeout(() => {
+    setProgessOpen(false);
+  }, 3000);
 
   return (
     <MainCard title="Sample Card">
@@ -35,24 +36,9 @@ export default function SamplePage() {
         setError('서버에서 처리중 에러 발생');}
       }>에러 발생</Button>
       
-      <TextField id="outlined-basic" label="Outlined" variant="outlined" value={second} type="number" onChange={(e)=>{ 
-        console.log(e.target.value); 
-        setSecond(e.target.value);
-      }} />
-
-      <Button variant="contained" color="primary" onClick={() => {
-        console.log('second', second);
-        setApiRequest({command:'hello', param: 3, callback: (response) => {console.log('callback', response);}});
-      }}>CALL HELLO - 3초</Button>
-
-      <Button variant="contained" color="primary" onClick={() => {
-        console.log('second', second);
-        setApiRequest({command:'hello', param: 11, callback: (response) => {console.log('callback', response);}});
-      }}>CALL HELLO - 11초</Button>
-
-
-      <ApiRequest apiRequest={apiRequest} />
       <HWPViewerPage/>
+      <ErrorAlert time={tick} message={error} />
+      <ProgessModal show={ProgessOpen} message="....데이터 처리중..." />
     </MainCard>
   );
 }

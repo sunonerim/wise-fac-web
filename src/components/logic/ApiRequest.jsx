@@ -1,43 +1,72 @@
 import React, {useState, useEffect} from 'react';
-import {Box, CircularProgress,Backdrop , Typography} from '@mui/material';
+import { Box,  CircularProgress,Backdrop , Typography} from '@mui/material';
 
-export default function ApiRequest( {api} ) {
-    const [show, setShow] = useState(false);
-    
-    useEffect(() => {
-        console.log('------------------ ApiRequest useEffect --------------------', api );
-        if ( api ){
-            setShow(true);
-            setTimeout(() => {
-                setShow(false);
-            }, 2000);
-        }
-        
-    }
-    , [api]);
 
-    const Progess = ({show}) => {
-        if ( show ) {
-            return (
-              <Backdrop
-              sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-              open={show}                            
-            >
-                <Box sx={{bgcolor:"#444",  width:240, height: 160, borderRadius:2, display: 'flex', flexDirection: 'column', alignItems:'center', justifyContent: 'center'}}>
-                    <CircularProgress color="inherit" />
-                    <Typography variant="h6" color="#fff" sx={{  mt:3}}>데이터 처리중...</Typography>
-                </Box>
-            </Backdrop>
-            );
-        } else {
-            return (
-                <></>
-            );
-        }
+import DriveRequest from 'api/driveRequest.jsx';
+import ErrorAlert from 'components/dialogs/ErrorAlert';
+import ProgessModal from 'components/dialogs/ProgressModal';
+
+export default function ApiRequest( {apiRequest} ) {
+  const [show, setShow] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    console.log('------------------ ApiRequest useEffect --------------------', apiRequest );
+    setError(null);
+    if ( apiRequest ){      
+      if( DriveRequest [ apiRequest.command] ){
+        setShow(true);
+        DriveRequest [ apiRequest.command]( apiRequest.param )
+          .then(response => {
+            console.log('hello', response);
+            setShow(false);
+            console.log( apiRequest.command, response );
+            if ( apiRequest.callback ) apiRequest.callback(response);
+          })
+          .catch( error => {
+            console.log('>>>>>>>>>>>> REQUEST', error);
+            setShow(false);
+            setError(error);
+          });
+      } else {
+        console.warn('>>>>>>>>>>>> REQUEST', 'NOT FOUND COMMAND');     
+      }
+
+      // DriveRequest['hello'](apiRequest.param)
+      //   .then(response => {
+      //     setShow(false);
+      //     console.log('hello', response);
+      //     // eslint-disable-next-line react/prop-types
+      //     if (apiRequest.callback) apiRequest.callback(response);
+      //   })
+      //   .catch( error => {
+      //     setShow(false);
+      //     console.log('>>>>>>>>>>>>.hello error', error); 
+      //     setError(error);
+      //   });
+      console.log('============ END ApiRequest useEffect ============');
     }
-    return (
-        <>            
-            <Progess show={show}/>
-        </>
-    );
+  }, [apiRequest]);
+
+  
+  const UIError = ({ error }) => {
+    console.log('UIError', error);
+    let time = Date.now();
+    if ( error !== null ) {
+      let resultMessage = '서버에서 오류가 발생했습니다.';
+      if( error.response.headers.resultmessage ){
+        resultMessage = decodeURI( error.response.headers.resultmessage).replace(/\+/g, ' ');            
+      }
+      return <ErrorAlert message={resultMessage} time={time} />;
+    } else {
+      return <></>;
+    }
+  };
+
+  return (
+    <>
+      <ProgessModal show={show} />
+      <UIError error={error} />
+    </>
+  );
 }
